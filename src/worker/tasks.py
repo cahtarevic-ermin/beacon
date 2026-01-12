@@ -32,7 +32,7 @@ def get_sync_session() -> Session:
 def run_full_scan(self, scan_id: str) -> dict:
     """
     Main task that orchestrates a complete website scan.
-    
+
     Uses Celery chord: run analyzers in parallel, then finalize.
     """
     scan_uuid = uuid.UUID(scan_id)
@@ -78,9 +78,9 @@ def run_full_scan(self, scan_id: str) -> dict:
 def finalize_scan(self, analyzer_results: list, scan_id: str) -> dict:
     """
     Called after all analyzers complete.
-    
+
     Generates recommendations and marks scan as complete.
-    
+
     Args:
         analyzer_results: List of results from each analyzer (passed by chord)
         scan_id: UUID of the scan
@@ -128,36 +128,37 @@ def finalize_scan(self, analyzer_results: list, scan_id: str) -> dict:
 def run_lighthouse_audit(self, scan_id: str, url: str) -> dict:
     """
     Run Lighthouse performance audit.
-    
-    TODO: Implement in Step 5 (Lighthouse Analyzer)
     """
     logger.info(f"Running Lighthouse audit for {url}")
 
-    # Placeholder - will be implemented in Step 5
-    result = {
-        "analyzer": "lighthouse",
-        "score": None,
-        "metrics": {},
-        "status": "not_implemented",
-    }
+    from analyzers.lighthouse import LighthouseAnalyzer
 
-    # Save placeholder result
+    analyzer = LighthouseAnalyzer()
+    result = analyzer.analyze(url)
+
+    # Save to database
     _save_analysis_result(
         scan_id=scan_id,
         analyzer_type=AnalyzerType.LIGHTHOUSE,
-        score=None,
-        metrics={},
-        raw_data={"status": "not_implemented"},
+        score=result.score,
+        metrics=result.metrics,
+        raw_data=result.raw_data if result.success else {"error": result.error},
     )
 
-    return result
+    return {
+        "analyzer": "lighthouse",
+        "score": result.score,
+        "metrics": result.metrics,
+        "success": result.success,
+        "error": result.error,
+    }
 
 
 @celery_app.task(bind=True, name="worker.tasks.run_seo_analysis")
 def run_seo_analysis(self, scan_id: str, url: str) -> dict:
     """
     Run SEO analysis.
-    
+
     TODO: Implement in Step 6 (SEO Analyzer)
     """
     logger.info(f"Running SEO analysis for {url}")
@@ -185,7 +186,7 @@ def run_seo_analysis(self, scan_id: str, url: str) -> dict:
 def run_security_audit(self, scan_id: str, url: str) -> dict:
     """
     Run security audit.
-    
+
     TODO: Implement in Step 7 (Security Analyzer)
     """
     logger.info(f"Running security audit for {url}")
@@ -213,7 +214,7 @@ def run_security_audit(self, scan_id: str, url: str) -> dict:
 def run_asset_analysis(self, scan_id: str, url: str) -> dict:
     """
     Run asset/code analysis.
-    
+
     TODO: Implement in Step 8 (Asset Analyzer)
     """
     logger.info(f"Running asset analysis for {url}")
@@ -240,7 +241,7 @@ def run_asset_analysis(self, scan_id: str, url: str) -> dict:
 def generate_recommendations(scan_id: str) -> dict:
     """
     Generate recommendations based on all analysis results.
-    
+
     TODO: Implement in Step 9 (Recommendation Engine)
     """
     logger.info(f"Generating recommendations for scan {scan_id}")
