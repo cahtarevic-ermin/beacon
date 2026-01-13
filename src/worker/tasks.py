@@ -136,7 +136,6 @@ def run_lighthouse_audit(self, scan_id: str, url: str) -> dict:
     analyzer = LighthouseAnalyzer()
     result = analyzer.analyze(url)
 
-    # Save to database
     _save_analysis_result(
         scan_id=scan_id,
         analyzer_type=AnalyzerType.LIGHTHOUSE,
@@ -158,28 +157,29 @@ def run_lighthouse_audit(self, scan_id: str, url: str) -> dict:
 def run_seo_analysis(self, scan_id: str, url: str) -> dict:
     """
     Run SEO analysis.
-
-    TODO: Implement in Step 6 (SEO Analyzer)
     """
     logger.info(f"Running SEO analysis for {url}")
 
-    # Placeholder - will be implemented in Step 6
-    result = {
-        "analyzer": "seo",
-        "score": None,
-        "metrics": {},
-        "status": "not_implemented",
-    }
+    from analyzers.seo import SEOAnalyzer
+
+    analyzer = SEOAnalyzer()
+    result = analyzer.analyze(url)
 
     _save_analysis_result(
         scan_id=scan_id,
         analyzer_type=AnalyzerType.SEO,
-        score=None,
-        metrics={},
-        raw_data={"status": "not_implemented"},
+        score=result.score,
+        metrics=result.metrics,
+        raw_data=result.raw_data if result.success else {"error": result.error},
     )
 
-    return result
+    return {
+        "analyzer": "seo",
+        "score": result.score,
+        "issues_count": result.metrics.get("issues_count", 0) if result.metrics else 0,
+        "success": result.success,
+        "error": result.error,
+    }
 
 
 @celery_app.task(bind=True, name="worker.tasks.run_security_audit")
