@@ -3,6 +3,7 @@
 from analyzers.base import AnalysisResult, BaseAnalyzer
 from analyzers.lighthouse import LighthouseAnalyzer, run_lighthouse_audit
 from analyzers.seo import SEOAnalyzer, run_seo_analysis
+from analyzers.security import SecurityAnalyzer, run_security_audit
 
 __all__ = [
     "AnalysisResult",
@@ -11,4 +12,6 @@ __all__ = [
     "run_lighthouse_audit",
     "SEOAnalyzer",
     "run_seo_analysis",
+    "SecurityAnalyzer",
+    "run_security_audit",
 ]
