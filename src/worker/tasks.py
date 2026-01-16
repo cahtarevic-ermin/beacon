@@ -186,28 +186,30 @@ def run_seo_analysis(self, scan_id: str, url: str) -> dict:
 def run_security_audit(self, scan_id: str, url: str) -> dict:
     """
     Run security audit.
-
-    TODO: Implement in Step 7 (Security Analyzer)
     """
     logger.info(f"Running security audit for {url}")
 
-    # Placeholder - will be implemented in Step 7
-    result = {
-        "analyzer": "security",
-        "score": None,
-        "metrics": {},
-        "status": "not_implemented",
-    }
+    from analyzers.security import SecurityAnalyzer
 
+    analyzer = SecurityAnalyzer()
+    result = analyzer.analyze(url)
+
+    # Save to database
     _save_analysis_result(
         scan_id=scan_id,
         analyzer_type=AnalyzerType.SECURITY,
-        score=None,
-        metrics={},
-        raw_data={"status": "not_implemented"},
+        score=result.score,
+        metrics=result.metrics,
+        raw_data=result.raw_data if result.success else {"error": result.error},
     )
 
-    return result
+    return {
+        "analyzer": "security",
+        "score": result.score,
+        "issues_count": result.metrics.get("issues_count", 0) if result.metrics else 0,
+        "success": result.success,
+        "error": result.error,
+    }
 
 
 @celery_app.task(bind=True, name="worker.tasks.run_asset_analysis")
