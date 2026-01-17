@@ -216,28 +216,30 @@ def run_security_audit(self, scan_id: str, url: str) -> dict:
 def run_asset_analysis(self, scan_id: str, url: str) -> dict:
     """
     Run asset/code analysis.
-
-    TODO: Implement in Step 8 (Asset Analyzer)
     """
     logger.info(f"Running asset analysis for {url}")
 
-    # Placeholder - will be implemented in Step 8
-    result = {
-        "analyzer": "assets",
-        "score": None,
-        "metrics": {},
-        "status": "not_implemented",
-    }
+    from analyzers.assets import AssetAnalyzer
 
+    analyzer = AssetAnalyzer()
+    result = analyzer.analyze(url)
+
+    # Save to database
     _save_analysis_result(
         scan_id=scan_id,
         analyzer_type=AnalyzerType.ASSETS,
-        score=None,
-        metrics={},
-        raw_data={"status": "not_implemented"},
+        score=result.score,
+        metrics=result.metrics,
+        raw_data=result.raw_data if result.success else {"error": result.error},
     )
 
-    return result
+    return {
+        "analyzer": "assets",
+        "score": result.score,
+        "issues_count": result.metrics.get("issues_count", 0) if result.metrics else 0,
+        "success": result.success,
+        "error": result.error,
+    }
 
 
 def generate_recommendations(scan_id: str) -> dict:
