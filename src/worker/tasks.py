@@ -261,7 +261,7 @@ def generate_recommendations(scan_id: str) -> dict:
         "recommendations": recommendations,
     }
 
-#2622466a-45dc-4b4f-aec8-30eec9489510
+
 def _save_analysis_result(
     scan_id: str,
     analyzer_type: AnalyzerType,
