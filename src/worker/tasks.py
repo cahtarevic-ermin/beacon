@@ -245,16 +245,20 @@ def run_asset_analysis(self, scan_id: str, url: str) -> dict:
 def generate_recommendations(scan_id: str) -> dict:
     """
     Generate recommendations based on all analysis results.
-
-    TODO: Implement in Step 9 (Recommendation Engine)
     """
     logger.info(f"Generating recommendations for scan {scan_id}")
 
-    # Placeholder - will be implemented in Step 9
+    from recommendations.engine import generate_recommendations_for_scan
+
+    scan_uuid = uuid.UUID(scan_id)
+
+    with get_sync_session() as session:
+        recommendations = generate_recommendations_for_scan(session, scan_uuid)
+
     return {
         "scan_id": scan_id,
-        "recommendations_count": 0,
-        "status": "not_implemented",
+        "recommendations_count": len(recommendations),
+        "recommendations": recommendations,
     }
 
 
